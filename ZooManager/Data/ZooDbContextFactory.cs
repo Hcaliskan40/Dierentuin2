@@ -8,7 +8,12 @@ public class ZooDbContextFactory : IDesignTimeDbContextFactory<ZooDbContext>
     public ZooDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ZooDbContext>();
-        optionsBuilder.UseSqlite("Data Source=zoo.db");
+
+        var connectionString =
+            "Server=(localdb)\\mssqllocaldb;Database=Dierentuin???;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+        optionsBuilder.UseSqlServer(connectionString);
+
         return new ZooDbContext(optionsBuilder.Options);
     }
 }

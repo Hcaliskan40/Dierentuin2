@@ -3,11 +3,8 @@ using ZooManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC + Views
+// MVC (Views) + Controllers (API)
 builder.Services.AddControllersWithViews();
-
-// API Controllers (voor later)
-builder.Services.AddControllers();
 
 // DbContext (SQL Server LocalDB)
 var connectionString =
@@ -19,7 +16,7 @@ builder.Services.AddDbContext<ZooDbContext>(options =>
 
 var app = builder.Build();
 
-// Seed database (optioneel, maar handig)
+// Seed database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZooDbContext>();
@@ -36,7 +33,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
 // MVC routes

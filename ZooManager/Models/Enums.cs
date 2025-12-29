@@ -1,6 +1,6 @@
 namespace ZooManager.Models;
 
-public enum AnimalSize
+public enum Size
 {
     Microscopic,
     VerySmall,
@@ -40,7 +40,7 @@ public enum Climate
     Arctic
 }
 
-[Flags]
+[System.Flags]
 public enum HabitatType
 {
     Forest = 1,

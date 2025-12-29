@@ -17,33 +17,30 @@ public class ZooDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Many-to-many: Animal <-> Category (via implicit join table)
-        modelBuilder.Entity<Category>()
-            .HasMany(c => c.Animals)
-            .WithMany(); // Animal heeft Category als (optioneel) navigation, maar many-to-many beheren we via join
+        // Table names (optioneel, maar netjes)
+        modelBuilder.Entity<Animal>().ToTable("Animals");
+        modelBuilder.Entity<Category>().ToTable("Categories");
+        modelBuilder.Entity<Enclosure>().ToTable("Enclosures");
 
-        // Self-referencing many-to-many: Animal -> Prey
-        modelBuilder.Entity<Animal>()
-            .HasMany(a => a.Prey)
-            .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "AnimalPrey",
-                j => j.HasOne<Animal>().WithMany().HasForeignKey("PreyId").OnDelete(DeleteBehavior.Restrict),
-                j => j.HasOne<Animal>().WithMany().HasForeignKey("PredatorId").OnDelete(DeleteBehavior.Cascade)
-            );
-
-        // Enclosure one-to-many
-        modelBuilder.Entity<Enclosure>()
-            .HasMany(e => e.Animals)
-            .WithOne(a => a.Enclosure)
-            .HasForeignKey(a => a.EnclosureId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // Category optional one-to-many style (Animal.CategoryId is nullable)
+        // Animal -> Category (optioneel)
         modelBuilder.Entity<Animal>()
             .HasOne(a => a.Category)
             .WithMany(c => c.Animals)
             .HasForeignKey(a => a.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Animal -> Enclosure (optioneel)
+        modelBuilder.Entity<Animal>()
+            .HasOne(a => a.Enclosure)
+            .WithMany(e => e.Animals)
+            .HasForeignKey(a => a.EnclosureId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Animal -> Prey (self reference, optioneel)
+        modelBuilder.Entity<Animal>()
+            .HasOne(a => a.Prey)
+            .WithMany()
+            .HasForeignKey(a => a.PreyId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

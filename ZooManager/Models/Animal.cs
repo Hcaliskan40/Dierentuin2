@@ -6,32 +6,33 @@ public class Animal
 {
     public int Id { get; set; }
 
-    [Required, MaxLength(80)]
+    [Required]
+    [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
-    [Required, MaxLength(80)]
+    [Required]
+    [MaxLength(100)]
     public string Species { get; set; } = string.Empty;
 
-    // Category: default NULL toegestaan
-    public int? CategoryId { get; set; }
-    public Category? Category { get; set; }
-
-    public AnimalSize Size { get; set; }
+    public Size Size { get; set; }
 
     public DietaryClass DietaryClass { get; set; }
 
     public ActivityPattern ActivityPattern { get; set; }
 
-    // Prey: veel animals kunnen "prooi" zijn of juist prooien hebben.
-    // Simpel gehouden: een Animal kan 0..n prooien hebben.
-    public ICollection<Animal> Prey { get; set; } = new List<Animal>();
+    // Nullable volgens opdracht (default NULL mogelijk)
+    public int? CategoryId { get; set; }
+    public Category? Category { get; set; }
 
-    // Enclosure: default NULL toegestaan
+    // Nullable volgens opdracht (default NULL mogelijk)
     public int? EnclosureId { get; set; }
     public Enclosure? Enclosure { get; set; }
 
-    // in square meters per animal
-    [Range(0.1, double.MaxValue)]
+    // Self-reference (prooi)
+    public int? PreyId { get; set; }
+    public Animal? Prey { get; set; }
+
+    // m2 per animal
     public double SpaceRequirement { get; set; }
 
     public SecurityLevel SecurityRequirement { get; set; }
