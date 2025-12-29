@@ -1,6 +1,13 @@
-﻿namespace ZooManager.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ZooManager.Models;
 
-public class ZooDBContext
+namespace ZooManager.Data;
+
+public class ZooDbContext : DbContext
 {
-    
+    public ZooDbContext(DbContextOptions<ZooDbContext> options) : base(options) { }
+
+    public DbSet<Animal> Animals => Set<Animal>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Enclosure> Enclosures => Set<Enclosure>();
 }
