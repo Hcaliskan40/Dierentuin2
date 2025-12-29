@@ -1,7 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using ZooManager.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<ZooDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ZooDb")));
+
 
 var app = builder.Build();
 
