@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ZooManager.Data;
+using ZooManager.Seed;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,5 +30,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ZooManager.Data.ZooDbContext>();
+    await DbSeeder.SeedAsync(db);
+}
 
 app.Run();
