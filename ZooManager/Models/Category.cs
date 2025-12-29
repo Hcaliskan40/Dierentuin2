@@ -9,5 +9,6 @@ public class Category
     [Required, MaxLength(80)]
     public string Name { get; set; } = string.Empty;
 
+    // Many-to-many
     public ICollection<Animal> Animals { get; set; } = new List<Animal>();
 }

@@ -1,0 +1,23 @@
+@model IEnumerable<ZooManager.Models.Animal>
+
+<table class="table">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Species</th>
+    <th>Diet</th>
+    <th>Size</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach (var a in Model)
+  {
+  <tr>
+    <td>@a.Name</td>
+    <td>@a.Species</td>
+    <td>@a.DietaryClass</td>
+    <td>@a.Size</td>
+  </tr>
+  }
+  </tbody>
+</table>

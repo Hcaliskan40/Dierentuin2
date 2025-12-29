@@ -37,11 +37,9 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Prey")
-                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("SecurityRequirement")
@@ -55,7 +53,6 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Species")
                         .IsRequired()
-                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -75,7 +72,6 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -97,7 +93,6 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("SecurityLevel")
