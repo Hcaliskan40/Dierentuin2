@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/Users/hamzacaliskan/RiderProjects/Dierentuin2/ZooManager/ZooManager.csproj": {}
+    "C:\\Users\\brand\\RiderProjects\\Dierentuin2\\ZooManager\\ZooManager.csproj": {}
   },
   "projects": {
-    "/Users/hamzacaliskan/RiderProjects/Dierentuin2/ZooManager/ZooManager.csproj": {
+    "C:\\Users\\brand\\RiderProjects\\Dierentuin2\\ZooManager\\ZooManager.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/hamzacaliskan/RiderProjects/Dierentuin2/ZooManager/ZooManager.csproj",
+        "projectUniqueName": "C:\\Users\\brand\\RiderProjects\\Dierentuin2\\ZooManager\\ZooManager.csproj",
         "projectName": "ZooManager",
-        "projectPath": "/Users/hamzacaliskan/RiderProjects/Dierentuin2/ZooManager/ZooManager.csproj",
-        "packagesPath": "/Users/hamzacaliskan/.nuget/packages/",
-        "outputPath": "/Users/hamzacaliskan/RiderProjects/Dierentuin2/ZooManager/obj/",
+        "projectPath": "C:\\Users\\brand\\RiderProjects\\Dierentuin2\\ZooManager\\ZooManager.csproj",
+        "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\brand\\RiderProjects\\Dierentuin2\\ZooManager\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/hamzacaliskan/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\brand\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,9 +43,8 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+          "auditMode": "direct"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -63,6 +69,10 @@
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
               "version": "[8.*, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -76,20 +86,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.7, 8.0.7]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.osx-arm64",
-              "version": "[8.0.7, 8.0.7]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.7, 8.0.7]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -98,7 +94,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.100-preview.7.24407.12/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
