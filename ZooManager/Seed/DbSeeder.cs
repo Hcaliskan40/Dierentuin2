@@ -37,15 +37,22 @@ public static class DbSeeder
 
         var enclosures = enclosureFaker.Generate(6);
         db.Enclosures.AddRange(enclosures);
+        
+        
+        var speciesList = new[]
+        {
+            "Lion","Tiger","Elephant","Giraffe","Zebra","Bear","Wolf","Penguin","Eagle","Snake",
+            "Crocodile","Turtle","Shark","Dolphin","Frog","Butterfly","Ant","Spider","Kangaroo","Rhino"
+        };
 
         // Animals
         var animalFaker = new Faker<Animal>()
             .RuleFor(a => a.Name, f => f.Name.FirstName())
-            .RuleFor(a => a.Species, f => f.Animal.Type())
+            .RuleFor(a => a.Species, f => f.PickRandom(speciesList))
             .RuleFor(a => a.Size, f => f.PickRandom<AnimalSize>())
             .RuleFor(a => a.DietaryClass, f => f.PickRandom<DietaryClass>())
             .RuleFor(a => a.ActivityPattern, f => f.PickRandom<ActivityPattern>())
-            .RuleFor(a => a.Prey, f => f.Random.Bool(0.4f) ? f.Animal.Type() : null)
+            .RuleFor(a => a.Prey, f => f.Random.Bool(0.4f) ? f.PickRandom(speciesList) : null)
             .RuleFor(a => a.SpaceRequirement, f => Math.Round(f.Random.Double(2, 40), 2))
             .RuleFor(a => a.SecurityRequirement, f => f.PickRandom<SecurityLevel>())
             .RuleFor(a => a.Category, f => f.PickRandom(categories))
