@@ -3,23 +3,22 @@ using ZooManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC (Views) + Controllers (API)
+// MVC + API
 builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 
 // DbContext (SQL Server LocalDB)
-var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=(localdb)\\mssqllocaldb;Database=Dierentuin???;Trusted_Connection=True;MultipleActiveResultSets=true";
-
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 builder.Services.AddDbContext<ZooDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
-// Seed database
+// Eerst migrations toepassen, dan seeden
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZooDbContext>();
+    db.Database.Migrate();
     DbSeeder.Seed(db);
 }
 
@@ -31,16 +30,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthorization();
 
-// MVC routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// API routes (attribute routing)
 app.MapControllers();
 
 app.Run();

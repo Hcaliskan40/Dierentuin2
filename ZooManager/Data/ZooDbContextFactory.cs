@@ -10,7 +10,7 @@ public class ZooDbContextFactory : IDesignTimeDbContextFactory<ZooDbContext>
         var optionsBuilder = new DbContextOptionsBuilder<ZooDbContext>();
 
         var connectionString =
-            "Server=(localdb)\\mssqllocaldb;Database=Dierentuin???;Trusted_Connection=True;MultipleActiveResultSets=true";
+            "Server=(localdb)\\mssqllocaldb;Database=Dierentuin5;Trusted_Connection=True;MultipleActiveResultSets=true";
 
         optionsBuilder.UseSqlServer(connectionString);
 

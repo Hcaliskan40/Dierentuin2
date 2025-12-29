@@ -17,30 +17,24 @@ public class ZooDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Table names (optioneel, maar netjes)
-        modelBuilder.Entity<Animal>().ToTable("Animals");
-        modelBuilder.Entity<Category>().ToTable("Categories");
-        modelBuilder.Entity<Enclosure>().ToTable("Enclosures");
+        // ✅ FIX: self-referencing FK mag NIET cascade (SET NULL is ook cascade in SQL Server)
+        modelBuilder.Entity<Animal>()
+            .HasOne(a => a.Prey)
+            .WithMany()
+            .HasForeignKey(a => a.PreyId)
+            .OnDelete(DeleteBehavior.NoAction);
 
-        // Animal -> Category (optioneel)
+        // Deze mogen wel SET NULL, maar NO ACTION is ook prima/veilig:
         modelBuilder.Entity<Animal>()
             .HasOne(a => a.Category)
             .WithMany(c => c.Animals)
             .HasForeignKey(a => a.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Animal -> Enclosure (optioneel)
         modelBuilder.Entity<Animal>()
             .HasOne(a => a.Enclosure)
             .WithMany(e => e.Animals)
             .HasForeignKey(a => a.EnclosureId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // Animal -> Prey (self reference, optioneel)
-        modelBuilder.Entity<Animal>()
-            .HasOne(a => a.Prey)
-            .WithMany()
-            .HasForeignKey(a => a.PreyId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
