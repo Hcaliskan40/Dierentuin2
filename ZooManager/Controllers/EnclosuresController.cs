@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ZooManager.Data;
 using ZooManager.Models;
+using ZooManager.ViewModels;
 
 namespace ZooManager.Controllers;
 
@@ -16,102 +17,104 @@ public class EnclosuresController : Controller
     }
 
     // GET: /Enclosures
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? name)
     {
-        var enclosures = await _db.Enclosures
-            .AsNoTracking()
-            .OrderBy(e => e.Name)
-            .ToListAsync();
+        var q = _db.Enclosures
+            .Include(e => e.Animals)
+            .AsQueryable();
 
-        return View(enclosures);
+        if (!string.IsNullOrWhiteSpace(name))
+            q = q.Where(e => e.Name.Contains(name));
+
+        ViewBag.Name = name;
+        return View(await q.OrderBy(e => e.Name).ToListAsync());
     }
 
     // GET: /Enclosures/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(int id)
     {
-        if (id == null) return NotFound();
+        var e = await _db.Enclosures
+            .Include(x => x.Animals)
+                .ThenInclude(a => a.Category)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        var enclosure = await _db.Enclosures
-            .AsNoTracking()
-            .Include(e => e.Animals)
-            .FirstOrDefaultAsync(e => e.Id == id.Value);
-
-        if (enclosure == null) return NotFound();
-
-        return View(enclosure);
+        if (e == null) return NotFound();
+        return View(e);
     }
 
     // GET: /Enclosures/Create
     public IActionResult Create()
     {
-        PopulateEnums();
-        return View(new Enclosure());
+        return View(new EnclosureEditVm());
     }
 
     // POST: /Enclosures/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Enclosure enclosure, string[] selectedHabitats)
+    public async Task<IActionResult> Create(EnclosureEditVm vm)
     {
-        enclosure.HabitatType = ParseHabitatFlags(selectedHabitats);
+        if (!ModelState.IsValid) return View(vm);
 
-        if (!ModelState.IsValid)
+        var e = new Enclosure
         {
-            PopulateEnums(enclosure);
-            return View(enclosure);
-        }
+            Name = vm.Name,
+            Climate = vm.Climate,
+            HabitatType = vm.HabitatType,
+            SecurityLevel = vm.SecurityLevel,
+            Size = vm.Size
+        };
 
-        _db.Enclosures.Add(enclosure);
+        _db.Enclosures.Add(e);
         await _db.SaveChangesAsync();
-
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /Enclosures/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id == null) return NotFound();
+        var e = await _db.Enclosures.FirstOrDefaultAsync(x => x.Id == id);
+        if (e == null) return NotFound();
 
-        var enclosure = await _db.Enclosures.FindAsync(id.Value);
-        if (enclosure == null) return NotFound();
+        var vm = new EnclosureEditVm
+        {
+            Id = e.Id,
+            Name = e.Name,
+            Climate = e.Climate,
+            HabitatType = e.HabitatType,
+            SecurityLevel = e.SecurityLevel,
+            Size = e.Size
+        };
 
-        PopulateEnums(enclosure);
-        return View(enclosure);
+        return View(vm);
     }
 
     // POST: /Enclosures/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Enclosure enclosure, string[] selectedHabitats)
+    public async Task<IActionResult> Edit(int id, EnclosureEditVm vm)
     {
-        if (id != enclosure.Id) return NotFound();
+        if (vm.Id == null || id != vm.Id) return BadRequest();
+        if (!ModelState.IsValid) return View(vm);
 
-        enclosure.HabitatType = ParseHabitatFlags(selectedHabitats);
+        var e = await _db.Enclosures.FirstOrDefaultAsync(x => x.Id == id);
+        if (e == null) return NotFound();
 
-        if (!ModelState.IsValid)
-        {
-            PopulateEnums(enclosure);
-            return View(enclosure);
-        }
+        e.Name = vm.Name;
+        e.Climate = vm.Climate;
+        e.HabitatType = vm.HabitatType;
+        e.SecurityLevel = vm.SecurityLevel;
+        e.Size = vm.Size;
 
-        _db.Entry(enclosure).State = EntityState.Modified;
         await _db.SaveChangesAsync();
-
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /Enclosures/Delete/5
-    public async Task<IActionResult> Delete(int? id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (id == null) return NotFound();
-
-        var enclosure = await _db.Enclosures
-            .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == id.Value);
-
-        if (enclosure == null) return NotFound();
-
-        return View(enclosure);
+        var e = await _db.Enclosures.FirstOrDefaultAsync(x => x.Id == id);
+        if (e == null) return NotFound();
+        return View(e);
     }
 
     // POST: /Enclosures/Delete/5
@@ -119,33 +122,18 @@ public class EnclosuresController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var enclosure = await _db.Enclosures.FindAsync(id);
-        if (enclosure == null) return RedirectToAction(nameof(Index));
+        var e = await _db.Enclosures
+            .Include(x => x.Animals)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        _db.Enclosures.Remove(enclosure);
+        if (e == null) return NotFound();
+
+        // dieren erin -> EnclosureId = NULL (vereiste: default NULL optie)
+        foreach (var a in e.Animals)
+            a.EnclosureId = null;
+
+        _db.Enclosures.Remove(e);
         await _db.SaveChangesAsync();
-
         return RedirectToAction(nameof(Index));
-    }
-
-    private void PopulateEnums(Enclosure? enclosure = null)
-    {
-        ViewBag.Climates = new SelectList(Enum.GetValues(typeof(Climate)).Cast<Climate>(), enclosure?.Climate);
-        ViewBag.SecurityLevels = new SelectList(Enum.GetValues(typeof(SecurityLevel)).Cast<SecurityLevel>(), enclosure?.SecurityLevel);
-    }
-
-    private static HabitatType ParseHabitatFlags(string[] selectedHabitats)
-    {
-        HabitatType result = 0;
-
-        foreach (var s in selectedHabitats ?? Array.Empty<string>())
-        {
-            if (Enum.TryParse<HabitatType>(s, out var value))
-            {
-                result |= value;
-            }
-        }
-
-        return result;
     }
 }

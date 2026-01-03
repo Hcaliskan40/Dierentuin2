@@ -1,17 +1,15 @@
 ﻿@model ZooManager.Models.Enclosure
-@{
-    ViewData["Title"] = "Delete Enclosure";
-}
 
 <h1>Delete Enclosure</h1>
-<hr />
 
 <div class="alert alert-warning">
-    Are you sure you want to delete <strong>@Model.Name</strong>?
+    Weet je zeker dat je verblijf <strong>@Model.Name</strong> wilt verwijderen?
+    Dieren erin krijgen dan <strong>Enclosure = NULL</strong>.
 </div>
 
 <form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <button class="btn btn-danger" type="submit">Delete</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
