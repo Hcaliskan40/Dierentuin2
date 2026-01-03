@@ -85,7 +85,8 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -108,8 +109,8 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SecurityLevel")
                         .HasColumnType("int");
@@ -137,7 +138,7 @@ namespace ZooManager.Migrations
                     b.HasOne("ZooManager.Models.Animal", "Prey")
                         .WithMany()
                         .HasForeignKey("PreyId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Category");
 

@@ -3,18 +3,30 @@ using ZooManager.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC + API
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-// DbContext (SQL Server LocalDB)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-builder.Services.AddDbContext<ZooDbContext>(options =>
-    options.UseSqlServer(connectionString));
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Server=(localdb)\\mssqllocaldb;Database=Dierentuin5;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+// ✅ Windows: LocalDB (SqlServer) - zoals opdracht
+// ✅ Mac: SQLite (alleen om lokaal te kunnen runnen)
+if (OperatingSystem.IsWindows())
+{
+    builder.Services.AddDbContext<ZooDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
+else
+{
+    // Mac/Linux fallback
+    builder.Services.AddDbContext<ZooDbContext>(options =>
+        options.UseSqlite("Data Source=zoo-dev.db"));
+}
 
 var app = builder.Build();
 
-// Eerst migrations toepassen, dan seeden
+// ✅ Migrate + Seed (alleen als DB bereikbaar is)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZooDbContext>();
@@ -30,6 +42,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseAuthorization();
 
@@ -38,5 +51,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
-
 app.Run();
