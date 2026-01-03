@@ -21,7 +21,6 @@ public class AnimalsController : Controller
         var animals = await _db.Animals
             .Include(a => a.Category)
             .Include(a => a.Enclosure)
-            .Include(a => a.Prey)
             .ToListAsync();
 
         return View(animals);
@@ -39,14 +38,13 @@ public class AnimalsController : Controller
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (animal == null) return NotFound();
-
         return View(animal);
     }
 
     // GET: /Animals/Create
     public async Task<IActionResult> Create()
     {
-        await FillDropDownsAsync();
+        await FillDropdowns();
         return View();
     }
 
@@ -57,7 +55,7 @@ public class AnimalsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            await FillDropDownsAsync(animal.CategoryId, animal.EnclosureId, animal.PreyId);
+            await FillDropdowns();
             return View(animal);
         }
 
@@ -74,7 +72,7 @@ public class AnimalsController : Controller
         var animal = await _db.Animals.FindAsync(id);
         if (animal == null) return NotFound();
 
-        await FillDropDownsAsync(animal.CategoryId, animal.EnclosureId, animal.PreyId, excludeAnimalId: animal.Id);
+        await FillDropdowns(animal.CategoryId, animal.EnclosureId, animal.PreyId);
         return View(animal);
     }
 
@@ -87,21 +85,12 @@ public class AnimalsController : Controller
 
         if (!ModelState.IsValid)
         {
-            await FillDropDownsAsync(animal.CategoryId, animal.EnclosureId, animal.PreyId, excludeAnimalId: animal.Id);
+            await FillDropdowns(animal.CategoryId, animal.EnclosureId, animal.PreyId);
             return View(animal);
         }
 
-        try
-        {
-            _db.Update(animal);
-            await _db.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await _db.Animals.AnyAsync(a => a.Id == animal.Id)) return NotFound();
-            throw;
-        }
-
+        _db.Update(animal);
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
@@ -113,11 +102,9 @@ public class AnimalsController : Controller
         var animal = await _db.Animals
             .Include(a => a.Category)
             .Include(a => a.Enclosure)
-            .Include(a => a.Prey)
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (animal == null) return NotFound();
-
         return View(animal);
     }
 
@@ -127,28 +114,23 @@ public class AnimalsController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var animal = await _db.Animals.FindAsync(id);
-        if (animal == null) return RedirectToAction(nameof(Index));
+        if (animal != null)
+        {
+            _db.Animals.Remove(animal);
+            await _db.SaveChangesAsync();
+        }
 
-        _db.Animals.Remove(animal);
-        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task FillDropDownsAsync(int? categoryId = null, int? enclosureId = null, int? preyId = null, int? excludeAnimalId = null)
+    private async Task FillDropdowns(int? selectedCategoryId = null, int? selectedEnclosureId = null, int? selectedPreyId = null)
     {
         var categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
         var enclosures = await _db.Enclosures.OrderBy(e => e.Name).ToListAsync();
+        var animals = await _db.Animals.OrderBy(a => a.Name).ToListAsync();
 
-        var preyQuery = _db.Animals.AsQueryable();
-        if (excludeAnimalId.HasValue)
-        {
-            preyQuery = preyQuery.Where(a => a.Id != excludeAnimalId.Value);
-        }
-
-        var prey = await preyQuery.OrderBy(a => a.Name).ToListAsync();
-
-        ViewBag.CategoryId = new SelectList(categories, "Id", "Name", categoryId);
-        ViewBag.EnclosureId = new SelectList(enclosures, "Id", "Name", enclosureId);
-        ViewBag.PreyId = new SelectList(prey, "Id", "Name", preyId);
+        ViewBag.CategoryId = new SelectList(categories, "Id", "Name", selectedCategoryId);
+        ViewBag.EnclosureId = new SelectList(enclosures, "Id", "Name", selectedEnclosureId);
+        ViewBag.PreyId = new SelectList(animals, "Id", "Name", selectedPreyId);
     }
 }
