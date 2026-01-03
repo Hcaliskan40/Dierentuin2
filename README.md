@@ -1,7 +1,6 @@
 # Virtuele Dierentuin
 
 **Projectnaam:** Dierentuin  
-**Studenten:**  
 - Esad Hamza Caliskan — 1206800  
 - Brandon Hiraki — 1200837
 
