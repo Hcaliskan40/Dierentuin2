@@ -1,79 +1,59 @@
-@model ZooManager.Models.Animal
-
-@{
-    ViewData["Title"] = "Edit Animal";
-}
+@model ZooManager.ViewModels.AnimalEditVm
 
 <h1>Edit Animal</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
-
     <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <label class="form-label">Name</label>
+        <input class="form-control" asp-for="Name" />
     </div>
 
     <div class="mb-3">
-        <label asp-for="Species" class="form-label"></label>
-        <input asp-for="Species" class="form-control" />
-        <span asp-validation-for="Species" class="text-danger"></span>
+        <label class="form-label">Species</label>
+        <input class="form-control" asp-for="Species" />
     </div>
 
     <div class="mb-3">
-        <label asp-for="DietaryClass" class="form-label"></label>
-        <select asp-for="DietaryClass" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.DietaryClass>()"></select>
+        <label class="form-label">Size</label>
+        <select class="form-select" asp-for="Size" asp-items="Html.GetEnumSelectList<ZooManager.Models.Size>()"></select>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Size" class="form-label"></label>
-        <select asp-for="Size" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.Size>()"></select>
+        <label class="form-label">DietaryClass</label>
+        <select class="form-select" asp-for="DietaryClass" asp-items="Html.GetEnumSelectList<ZooManager.Models.DietaryClass>()"></select>
     </div>
 
     <div class="mb-3">
-        <label asp-for="ActivityPattern" class="form-label"></label>
-        <select asp-for="ActivityPattern" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.ActivityPattern>()"></select>
-    </div>
-
-    <!-- ✅ Category dropdown -->
-    <div class="mb-3">
-        <label asp-for="CategoryId" class="form-label">Category</label>
-        <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
-            <option value="">None</option>
-        </select>
-    </div>
-
-    <!-- ✅ Enclosure dropdown -->
-    <div class="mb-3">
-        <label asp-for="EnclosureId" class="form-label">Enclosure</label>
-        <select asp-for="EnclosureId" class="form-select" asp-items="ViewBag.EnclosureId">
-            <option value="">None</option>
-        </select>
-    </div>
-
-    <!-- ✅ Prey dropdown -->
-    <div class="mb-3">
-        <label asp-for="PreyId" class="form-label">Prey</label>
-        <select asp-for="PreyId" class="form-select" asp-items="ViewBag.PreyId">
-            <option value="">None</option>
-        </select>
+        <label class="form-label">ActivityPattern</label>
+        <select class="form-select" asp-for="ActivityPattern" asp-items="Html.GetEnumSelectList<ZooManager.Models.ActivityPattern>()"></select>
     </div>
 
     <div class="mb-3">
-        <label asp-for="SpaceRequirement" class="form-label"></label>
-        <input asp-for="SpaceRequirement" class="form-control" />
+        <label class="form-label">SpaceRequirement (m2)</label>
+        <input class="form-control" asp-for="SpaceRequirement" type="number" step="0.01" />
     </div>
 
     <div class="mb-3">
-        <label asp-for="SecurityRequirement" class="form-label"></label>
-        <select asp-for="SecurityRequirement" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.SecurityLevel>()"></select>
+        <label class="form-label">SecurityRequirement</label>
+        <select class="form-select" asp-for="SecurityRequirement" asp-items="Html.GetEnumSelectList<ZooManager.Models.SecurityLevel>()"></select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select class="form-select" asp-for="CategoryId" asp-items="Model.CategoryOptions"></select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Enclosure</label>
+        <select class="form-select" asp-for="EnclosureId" asp-items="Model.EnclosureOptions"></select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Prey</label>
+        <select class="form-select" asp-for="PreyId" asp-items="Model.PreyOptions"></select>
     </div>
 
     <button class="btn btn-primary" type="submit">Save</button>
     <a class="btn btn-secondary" asp-action="Index">Back</a>
 </form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

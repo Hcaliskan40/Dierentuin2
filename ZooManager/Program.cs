@@ -1,37 +1,27 @@
 using Microsoft.EntityFrameworkCore;
 using ZooManager.Data;
+using ZooManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=(localdb)\\mssqllocaldb;Database=Dierentuin5;Trusted_Connection=True;MultipleActiveResultSets=true";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new InvalidOperationException("DefaultConnection missing.");
 
-// ✅ Windows: LocalDB (SqlServer) - zoals opdracht
-// ✅ Mac: SQLite (alleen om lokaal te kunnen runnen)
-if (OperatingSystem.IsWindows())
-{
-    builder.Services.AddDbContext<ZooDbContext>(options =>
-        options.UseSqlServer(connectionString));
-}
-else
-{
-    // Mac/Linux fallback
-    builder.Services.AddDbContext<ZooDbContext>(options =>
-        options.UseSqlite("Data Source=zoo-dev.db"));
-}
+builder.Services.AddDbContext<ZooDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ZooLogicService>();
 
 var app = builder.Build();
 
-// ✅ Migrate + Seed (alleen als DB bereikbaar is)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ZooDbContext>();
     db.Database.Migrate();
-    DbSeeder.Seed(db);
+    // DbSeeder.Seed(db); // alleen als jullie seeding willen gebruiken
 }
 
 if (!app.Environment.IsDevelopment())
@@ -42,7 +32,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthorization();
 
@@ -51,4 +40,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
+
 app.Run();

@@ -3,134 +3,211 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ZooManager.Data;
 using ZooManager.Models;
+using ZooManager.Services;
+using ZooManager.ViewModels;
 
 namespace ZooManager.Controllers;
 
 public class AnimalsController : Controller
 {
     private readonly ZooDbContext _db;
+    private readonly ZooLogicService _logic;
 
-    public AnimalsController(ZooDbContext db)
+    public AnimalsController(ZooDbContext db, ZooLogicService logic)
     {
         _db = db;
+        _logic = logic;
     }
 
-    // GET: /Animals
-    public async Task<IActionResult> Index()
+    // FILTER op (bijna) alle eigenschappen via querystring
+    // /Animals?name=a&species=lion&size=Large&categoryId=1&enclosureId=2&diet=Carnivore&activity=Diurnal&security=High
+    public async Task<IActionResult> Index(
+        string? name,
+        string? species,
+        Size? size,
+        DietaryClass? diet,
+        ActivityPattern? activity,
+        SecurityLevel? security,
+        int? categoryId,
+        int? enclosureId)
     {
-        var animals = await _db.Animals
+        var q = _db.Animals
             .Include(a => a.Category)
             .Include(a => a.Enclosure)
-            .ToListAsync();
+            .AsQueryable();
 
+        if (!string.IsNullOrWhiteSpace(name))
+            q = q.Where(a => a.Name.Contains(name));
+
+        if (!string.IsNullOrWhiteSpace(species))
+            q = q.Where(a => a.Species.Contains(species));
+
+        if (size != null) q = q.Where(a => a.Size == size);
+        if (diet != null) q = q.Where(a => a.DietaryClass == diet);
+        if (activity != null) q = q.Where(a => a.ActivityPattern == activity);
+        if (security != null) q = q.Where(a => a.SecurityRequirement == security);
+
+        if (categoryId != null) q = q.Where(a => a.CategoryId == categoryId);
+        if (enclosureId != null) q = q.Where(a => a.EnclosureId == enclosureId);
+
+        var animals = await q.OrderBy(a => a.Name).ToListAsync();
         return View(animals);
     }
 
-    // GET: /Animals/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(int id)
     {
-        if (id == null) return NotFound();
+        var a = await _db.Animals
+            .Include(x => x.Category)
+            .Include(x => x.Enclosure)
+            .Include(x => x.Prey)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        var animal = await _db.Animals
-            .Include(a => a.Category)
-            .Include(a => a.Enclosure)
-            .Include(a => a.Prey)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        if (a == null) return NotFound();
 
-        if (animal == null) return NotFound();
-        return View(animal);
+        ViewBag.Sunrise = _logic.AnimalSunrise(a);
+        ViewBag.Sunset = _logic.AnimalSunset(a);
+        ViewBag.Feeding = await _logic.AnimalFeedingTimeAsync(a.Id);
+        ViewBag.Constraints = await _logic.AnimalCheckConstraintsAsync(a.Id);
+
+        return View(a);
     }
 
-    // GET: /Animals/Create
     public async Task<IActionResult> Create()
     {
-        await FillDropdowns();
-        return View();
+        var vm = await BuildAnimalVmAsync(new AnimalEditVm());
+        return View(vm);
     }
 
-    // POST: /Animals/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Animal animal)
+    public async Task<IActionResult> Create(AnimalEditVm vm)
     {
         if (!ModelState.IsValid)
         {
-            await FillDropdowns();
-            return View(animal);
+            vm = await BuildAnimalVmAsync(vm);
+            return View(vm);
         }
 
-        _db.Animals.Add(animal);
+        var a = new Animal
+        {
+            Name = vm.Name,
+            Species = vm.Species,
+            Size = vm.Size,
+            DietaryClass = vm.DietaryClass,
+            ActivityPattern = vm.ActivityPattern,
+            SpaceRequirement = vm.SpaceRequirement,
+            SecurityRequirement = vm.SecurityRequirement,
+            CategoryId = vm.CategoryId,
+            EnclosureId = vm.EnclosureId,
+            PreyId = vm.PreyId
+        };
+
+        _db.Animals.Add(a);
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: /Animals/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id == null) return NotFound();
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
 
-        var animal = await _db.Animals.FindAsync(id);
-        if (animal == null) return NotFound();
+        var vm = new AnimalEditVm
+        {
+            Id = a.Id,
+            Name = a.Name,
+            Species = a.Species,
+            Size = a.Size,
+            DietaryClass = a.DietaryClass,
+            ActivityPattern = a.ActivityPattern,
+            SpaceRequirement = a.SpaceRequirement,
+            SecurityRequirement = a.SecurityRequirement,
+            CategoryId = a.CategoryId,
+            EnclosureId = a.EnclosureId,
+            PreyId = a.PreyId
+        };
 
-        await FillDropdowns(animal.CategoryId, animal.EnclosureId, animal.PreyId);
-        return View(animal);
+        vm = await BuildAnimalVmAsync(vm);
+        return View(vm);
     }
 
-    // POST: /Animals/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Animal animal)
+    public async Task<IActionResult> Edit(int id, AnimalEditVm vm)
     {
-        if (id != animal.Id) return NotFound();
+        if (id != vm.Id) return BadRequest();
+
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
 
         if (!ModelState.IsValid)
         {
-            await FillDropdowns(animal.CategoryId, animal.EnclosureId, animal.PreyId);
-            return View(animal);
+            vm = await BuildAnimalVmAsync(vm);
+            return View(vm);
         }
 
-        _db.Update(animal);
+        a.Name = vm.Name;
+        a.Species = vm.Species;
+        a.Size = vm.Size;
+        a.DietaryClass = vm.DietaryClass;
+        a.ActivityPattern = vm.ActivityPattern;
+        a.SpaceRequirement = vm.SpaceRequirement;
+        a.SecurityRequirement = vm.SecurityRequirement;
+        a.CategoryId = vm.CategoryId;
+        a.EnclosureId = vm.EnclosureId;
+        a.PreyId = vm.PreyId;
+
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: /Animals/Delete/5
-    public async Task<IActionResult> Delete(int? id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (id == null) return NotFound();
-
-        var animal = await _db.Animals
-            .Include(a => a.Category)
-            .Include(a => a.Enclosure)
-            .FirstOrDefaultAsync(a => a.Id == id);
-
-        if (animal == null) return NotFound();
-        return View(animal);
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
+        return View(a);
     }
 
-    // POST: /Animals/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var animal = await _db.Animals.FindAsync(id);
-        if (animal != null)
-        {
-            _db.Animals.Remove(animal);
-            await _db.SaveChangesAsync();
-        }
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
 
+        _db.Animals.Remove(a);
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task FillDropdowns(int? selectedCategoryId = null, int? selectedEnclosureId = null, int? selectedPreyId = null)
+    private async Task<AnimalEditVm> BuildAnimalVmAsync(AnimalEditVm vm)
     {
         var categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
         var enclosures = await _db.Enclosures.OrderBy(e => e.Name).ToListAsync();
         var animals = await _db.Animals.OrderBy(a => a.Name).ToListAsync();
 
-        ViewBag.CategoryId = new SelectList(categories, "Id", "Name", selectedCategoryId);
-        ViewBag.EnclosureId = new SelectList(enclosures, "Id", "Name", selectedEnclosureId);
-        ViewBag.PreyId = new SelectList(animals, "Id", "Name", selectedPreyId);
+        // ✅ FIX: None optie + echte categories
+        vm.CategoryOptions = new List<SelectListItem>
+        {
+            new("None", "")
+        };
+        vm.CategoryOptions.AddRange(categories.Select(c =>
+            new SelectListItem(c.Name, c.Id.ToString())));
+
+        vm.EnclosureOptions = new List<SelectListItem>
+        {
+            new("None", "")
+        };
+        vm.EnclosureOptions.AddRange(enclosures.Select(e =>
+            new SelectListItem(e.Name, e.Id.ToString())));
+
+        vm.PreyOptions = new List<SelectListItem>
+        {
+            new("None", "")
+        };
+        vm.PreyOptions.AddRange(animals.Where(a => a.Id != vm.Id).Select(a =>
+            new SelectListItem($"{a.Name} ({a.Species})", a.Id.ToString())));
+
+        return vm;
     }
 }
