@@ -1,0 +1,26 @@
+@model ZooManager.Models.Animal
+    @{
+    ViewData["Title"] = "Delete Animal";
+}
+
+<h1>Delete Animal</h1>
+    <hr/>
+
+    <div class="alert alert-warning">
+    Weet je zeker dat je <strong>@Model.Name</strong> wil verwijderen?
+    </div>
+
+    <dl class="row">
+    <dt class="col-sm-3">Species</dt>
+    <dd class="col-sm-9">@Model.Species</dd>
+    <dt class="col-sm-3">Category</dt>
+    <dd class="col-sm-9">@(Model.Category?.Name ?? "-")</dd>
+    <dt class="col-sm-3">Enclosure</dt>
+    <dd class="col-sm-9">@(Model.Enclosure?.Name ?? "-")</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post" class="d-flex gap-2">
+    <input type="hidden" asp-for="Id" />
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+    </form>
