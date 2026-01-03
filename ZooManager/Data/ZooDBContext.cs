@@ -5,9 +5,7 @@ namespace ZooManager.Data;
 
 public class ZooDbContext : DbContext
 {
-    public ZooDbContext(DbContextOptions<ZooDbContext> options) : base(options)
-    {
-    }
+    public ZooDbContext(DbContextOptions<ZooDbContext> options) : base(options) { }
 
     public DbSet<Animal> Animals => Set<Animal>();
     public DbSet<Category> Categories => Set<Category>();
@@ -17,41 +15,38 @@ public class ZooDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Animal
-        modelBuilder.Entity<Animal>(entity =>
+        modelBuilder.Entity<Animal>(b =>
         {
-            entity.Property(a => a.Name).HasMaxLength(100).IsRequired();
-            entity.Property(a => a.Species).HasMaxLength(100).IsRequired();
+            b.Property(a => a.Name).HasMaxLength(100).IsRequired();
+            b.Property(a => a.Species).HasMaxLength(100).IsRequired();
 
-            // Category relatie: SET NULL is prima
-            entity.HasOne(a => a.Category)
+            // Category: NULL allowed
+            b.HasOne(a => a.Category)
                 .WithMany(c => c.Animals)
                 .HasForeignKey(a => a.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Enclosure relatie: SET NULL is prima
-            entity.HasOne(a => a.Enclosure)
+            // Enclosure: NULL allowed
+            b.HasOne(a => a.Enclosure)
                 .WithMany(e => e.Animals)
                 .HasForeignKey(a => a.EnclosureId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Prey relatie (self reference): GEEN cascade/SET NULL, anders "multiple cascade paths"
-            entity.HasOne(a => a.Prey)
+            // Prey self-reference: NO ACTION to avoid multiple cascade paths in SQL Server
+            b.HasOne(a => a.Prey)
                 .WithMany()
                 .HasForeignKey(a => a.PreyId)
-                .OnDelete(DeleteBehavior.NoAction); // <-- dit fixt Brandon's error
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Category
-        modelBuilder.Entity<Category>(entity =>
+        modelBuilder.Entity<Category>(b =>
         {
-            entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+            b.Property(c => c.Name).HasMaxLength(100).IsRequired();
         });
 
-        // Enclosure
-        modelBuilder.Entity<Enclosure>(entity =>
+        modelBuilder.Entity<Enclosure>(b =>
         {
-            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            b.Property(e => e.Name).HasMaxLength(120).IsRequired();
         });
     }
 }
