@@ -3,7 +3,7 @@
 **Projectnaam:** Dierentuin  
 **Studenten:**  
 - Esad Hamza Caliskan — 1206800  
-- Brandon Hiraki — (vul je studentnummer hier in)
+- Brandon Hiraki — 1200837
 
 ---
 
