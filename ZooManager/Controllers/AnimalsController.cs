@@ -36,23 +36,38 @@ public class AnimalsController : Controller
             .Include(a => a.Enclosure)
             .AsQueryable();
 
+        // 🔍 Filters
         if (!string.IsNullOrWhiteSpace(name))
             q = q.Where(a => a.Name.Contains(name));
 
         if (!string.IsNullOrWhiteSpace(species))
             q = q.Where(a => a.Species.Contains(species));
 
-        if (size != null) q = q.Where(a => a.Size == size);
-        if (diet != null) q = q.Where(a => a.DietaryClass == diet);
-        if (activity != null) q = q.Where(a => a.ActivityPattern == activity);
-        if (security != null) q = q.Where(a => a.SecurityRequirement == security);
+        if (size.HasValue)
+            q = q.Where(a => a.Size == size);
 
-        if (categoryId != null) q = q.Where(a => a.CategoryId == categoryId);
-        if (enclosureId != null) q = q.Where(a => a.EnclosureId == enclosureId);
+        if (diet.HasValue)
+            q = q.Where(a => a.DietaryClass == diet);
 
-        var animals = await q.OrderBy(a => a.Name).ToListAsync();
-        return View(animals);
+        if (activity.HasValue)
+            q = q.Where(a => a.ActivityPattern == activity);
+
+        if (security.HasValue)
+            q = q.Where(a => a.SecurityRequirement == security);
+
+        if (categoryId.HasValue)
+            q = q.Where(a => a.CategoryId == categoryId);
+
+        if (enclosureId.HasValue)
+            q = q.Where(a => a.EnclosureId == enclosureId);
+
+        // Data voor dropdowns
+        ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.Enclosures = await _db.Enclosures.OrderBy(e => e.Name).ToListAsync();
+
+        return View(await q.OrderBy(a => a.Name).ToListAsync());
     }
+
 
     public async Task<IActionResult> Details(int id)
     {
