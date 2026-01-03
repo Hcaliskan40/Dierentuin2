@@ -1,0 +1,31 @@
+﻿@model IEnumerable<ZooManager.Models.Category>
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="m-0">Categories</h1>
+    <a class="btn btn-primary" asp-action="Create">+ Create Category</a>
+</div>
+
+<table class="table table-striped align-middle">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th style="width: 220px;" class="text-end">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.Name</td>
+            <td class="text-end">
+                <a class="btn btn-outline-secondary btn-sm" asp-action="Details" asp-route-id="@c.Id">Details</a>
+                <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@c.Id">Edit</a>
+                <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@c.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

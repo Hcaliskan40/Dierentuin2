@@ -14,16 +14,24 @@ public class CategoriesController : Controller
         _db = db;
     }
 
+    // GET: /Categories
     public async Task<IActionResult> Index()
     {
-        return View(await _db.Categories.OrderBy(c => c.Name).ToListAsync());
+        var categories = await _db.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+        return View(categories);
     }
 
+    // GET: /Categories/Details/5
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null) return NotFound();
 
         var category = await _db.Categories
+            .AsNoTracking()
             .Include(c => c.Animals)
             .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -32,11 +40,13 @@ public class CategoriesController : Controller
         return View(category);
     }
 
+    // GET: /Categories/Create
     public IActionResult Create()
     {
-        return View();
+        return View(new Category());
     }
 
+    // POST: /Categories/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Category category)
@@ -45,19 +55,22 @@ public class CategoriesController : Controller
 
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
+
         return RedirectToAction(nameof(Index));
     }
 
+    // GET: /Categories/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
 
-        var category = await _db.Categories.FindAsync(id);
+        var category = await _db.Categories.FindAsync(id.Value);
         if (category == null) return NotFound();
 
         return View(category);
     }
 
+    // POST: /Categories/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Category category)
@@ -65,21 +78,27 @@ public class CategoriesController : Controller
         if (id != category.Id) return NotFound();
         if (!ModelState.IsValid) return View(category);
 
-        _db.Update(category);
+        _db.Entry(category).State = EntityState.Modified;
         await _db.SaveChangesAsync();
+
         return RedirectToAction(nameof(Index));
     }
 
+    // GET: /Categories/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
 
-        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        var category = await _db.Categories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id.Value);
+
         if (category == null) return NotFound();
 
         return View(category);
     }
 
+    // POST: /Categories/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -89,6 +108,7 @@ public class CategoriesController : Controller
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync();
+
         return RedirectToAction(nameof(Index));
     }
 }

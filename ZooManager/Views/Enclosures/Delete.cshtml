@@ -1,0 +1,17 @@
+﻿@model ZooManager.Models.Enclosure
+@{
+    ViewData["Title"] = "Delete Enclosure";
+}
+
+<h1>Delete Enclosure</h1>
+<hr />
+
+<div class="alert alert-warning">
+    Are you sure you want to delete <strong>@Model.Name</strong>?
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
