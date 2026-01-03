@@ -1,17 +1,20 @@
 ﻿@model ZooManager.Models.Category
-@{
-    ViewData["Title"] = "Delete Category";
-}
 
 <h1>Delete Category</h1>
-<hr />
 
 <div class="alert alert-warning">
-    Are you sure you want to delete <strong>@Model.Name</strong>?
+    Weet je zeker dat je deze categorie wilt verwijderen?
+    (Animals die erin zaten worden automatisch Category = NULL)
 </div>
 
+<dl class="row">
+    <dt class="col-sm-2">Name</dt>
+    <dd class="col-sm-10">@Model.Name</dd>
+</dl>
+
 <form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <button class="btn btn-danger" type="submit">Delete</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

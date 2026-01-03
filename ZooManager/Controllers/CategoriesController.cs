@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ZooManager.Data;
 using ZooManager.Models;
+using ZooManager.ViewModels;
 
 namespace ZooManager.Controllers;
 
@@ -14,39 +16,59 @@ public class CategoriesController : Controller
         _db = db;
     }
 
-    // GET: /Categories
-    public async Task<IActionResult> Index()
+    // 3d: zoeken/filteren op categorie
+    // /Categories?search=birds
+    public async Task<IActionResult> Index(string? search)
     {
-        var categories = await _db.Categories
-            .AsNoTracking()
-            .OrderBy(c => c.Name)
-            .ToListAsync();
+        var q = _db.Categories.AsQueryable();
 
-        return View(categories);
+        if (!string.IsNullOrWhiteSpace(search))
+            q = q.Where(c => c.Name.Contains(search));
+
+        var list = await q.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.Search = search;
+
+        return View(list);
     }
 
-    // GET: /Categories/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(int id)
     {
-        if (id == null) return NotFound();
-
-        var category = await _db.Categories
-            .AsNoTracking()
-            .Include(c => c.Animals)
-            .FirstOrDefaultAsync(c => c.Id == id);
-
+        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null) return NotFound();
 
-        return View(category);
+        var animalsInCategory = await _db.Animals
+            .Where(a => a.CategoryId == id)
+            .OrderBy(a => a.Name)
+            .ToListAsync();
+
+        // Alleen dieren die nog geen categorie hebben (default NULL)
+        var unassignedAnimals = await _db.Animals
+            .Where(a => a.CategoryId == null)
+            .OrderBy(a => a.Name)
+            .ToListAsync();
+
+        var vm = new CategoryDetailsVm
+        {
+            Category = category,
+            AnimalsInCategory = animalsInCategory,
+            AssignableAnimals = new List<SelectListItem>
+            {
+                new("Choose animal...", "")
+            }
+        };
+
+        vm.AssignableAnimals.AddRange(unassignedAnimals.Select(a =>
+            new SelectListItem($"{a.Name} ({a.Species})", a.Id.ToString())
+        ));
+
+        return View(vm);
     }
 
-    // GET: /Categories/Create
     public IActionResult Create()
     {
         return View(new Category());
     }
 
-    // POST: /Categories/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Category category)
@@ -55,60 +77,85 @@ public class CategoriesController : Controller
 
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
-
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: /Categories/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id == null) return NotFound();
-
-        var category = await _db.Categories.FindAsync(id.Value);
+        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null) return NotFound();
-
         return View(category);
     }
 
-    // POST: /Categories/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Category category)
     {
-        if (id != category.Id) return NotFound();
+        if (id != category.Id) return BadRequest();
         if (!ModelState.IsValid) return View(category);
 
-        _db.Entry(category).State = EntityState.Modified;
-        await _db.SaveChangesAsync();
+        var dbCat = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        if (dbCat == null) return NotFound();
 
+        dbCat.Name = category.Name;
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: /Categories/Delete/5
-    public async Task<IActionResult> Delete(int? id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (id == null) return NotFound();
-
-        var category = await _db.Categories
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id.Value);
-
+        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null) return NotFound();
-
         return View(category);
     }
 
-    // POST: /Categories/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category == null) return RedirectToAction(nameof(Index));
+        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
+        if (category == null) return NotFound();
+
+        // dieren die deze categorie hebben -> terug naar NULL (default)
+        var animals = await _db.Animals.Where(a => a.CategoryId == id).ToListAsync();
+        foreach (var a in animals) a.CategoryId = null;
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync();
-
         return RedirectToAction(nameof(Index));
+    }
+
+    // 3c: dier toekennen aan categorie
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignAnimal(int categoryId, int? selectedAnimalId)
+    {
+        if (selectedAnimalId == null)
+            return RedirectToAction(nameof(Details), new { id = categoryId });
+
+        var animal = await _db.Animals.FirstOrDefaultAsync(a => a.Id == selectedAnimalId.Value);
+        if (animal == null) return NotFound();
+
+        animal.CategoryId = categoryId;
+        await _db.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Details), new { id = categoryId });
+    }
+
+    // 3c: dier losmaken (Category -> NULL)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnassignAnimal(int categoryId, int animalId)
+    {
+        var animal = await _db.Animals.FirstOrDefaultAsync(a => a.Id == animalId);
+        if (animal == null) return NotFound();
+
+        if (animal.CategoryId == categoryId)
+        {
+            animal.CategoryId = null;
+            await _db.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Details), new { id = categoryId });
     }
 }

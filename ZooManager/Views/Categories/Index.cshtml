@@ -1,18 +1,26 @@
 ﻿@model IEnumerable<ZooManager.Models.Category>
-@{
-    ViewData["Title"] = "Categories";
-}
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="m-0">Categories</h1>
-    <a class="btn btn-primary" asp-action="Create">+ Create Category</a>
-</div>
+<h1>Categories</h1>
 
-<table class="table table-striped align-middle">
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name..." />
+    </div>
+    <div class="col">
+        <button class="btn btn-primary">Search</button>
+        <a asp-action="Index" class="btn btn-secondary">Reset</a>
+    </div>
+</form>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create new</a>
+</p>
+
+<table class="table table-striped">
     <thead>
     <tr>
         <th>Name</th>
-        <th style="width: 220px;" class="text-end">Actions</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -20,10 +28,10 @@
     {
         <tr>
             <td>@c.Name</td>
-            <td class="text-end">
-                <a class="btn btn-outline-secondary btn-sm" asp-action="Details" asp-route-id="@c.Id">Details</a>
-                <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@c.Id">Edit</a>
-                <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@c.Id">Delete</a>
+            <td>
+                <a asp-action="Details" asp-route-id="@c.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@c.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@c.Id">Delete</a>
             </td>
         </tr>
     }
