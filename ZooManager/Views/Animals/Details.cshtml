@@ -5,13 +5,19 @@
 <div class="mb-3">
     <strong>Name:</strong> @Model.Name <br />
     <strong>Species:</strong> @Model.Species <br />
+    <strong>Size:</strong> @Model.Size <br />
+    <strong>Diet:</strong> @Model.DietaryClass <br />
+    <strong>Activity:</strong> @Model.ActivityPattern <br />
+    <strong>Security requirement:</strong> @Model.SecurityRequirement <br />
+    <strong>Space requirement:</strong> @Model.SpaceRequirement <br />
     <strong>Category:</strong> @(Model.Category?.Name ?? "None") <br />
     <strong>Enclosure:</strong> @(Model.Enclosure?.Name ?? "None") <br />
+    <strong>Prey:</strong> @(Model.Prey?.Name ?? "None") <br />
 </div>
 
 <hr />
 
-<h3>Actions</h3>
+<h3>Actions (trigger)</h3>
 
 <div class="d-flex gap-2 flex-wrap mb-3">
     <form asp-action="Sunrise" method="post">
@@ -47,4 +53,20 @@
     </div>
 }
 
+<hr />
+
+<h3>Preview (optional)</h3>
+<ul>
+    <li><strong>Sunrise:</strong> @ViewBag.Sunrise</li>
+    <li><strong>Sunset:</strong> @ViewBag.Sunset</li>
+    <li><strong>Feeding:</strong> @ViewBag.Feeding</li>
+</ul>
+
+@if (ViewBag.Constraints != null)
+{
+    <h4>Constraints</h4>
+    <pre style="white-space:pre-wrap;">@ViewBag.Constraints</pre>
+}
+
 <a class="btn btn-secondary" asp-action="Index">Back</a>
+<a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
