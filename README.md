@@ -1,120 +1,89 @@
-Virtuele Dierentuin – Designdocument
-Projectnaam: Dierentuin
-Studenten:
-Esad Hamza Caliskan – 1206800
-Brandon Hiraki – 1200837
-Inleiding
-Voor deze eindopdracht wordt een virtuele dierentuin ontwikkeld. Dit project maakt gebruik van de programmeertaal C# in combinatie met ASP.NET Core MVC om een webapplicatie te bouwen die dieren, verblijven en categorieën beheert.
+# Virtuele Dierentuin
 
-Het doel van de applicatie is om gebruikers in staat te stellen een dierentuin te organiseren en te beheren. Daarnaast worden acties zoals zonsopgang, zonsondergang en etenstijd gesimuleerd.
+**Projectnaam:** Dierentuin  
+**Studenten:**  
+- Esad Hamza Caliskan — 1206800  
+- Brandon Hiraki — (vul je studentnummer hier in)
 
-Deze opdracht is bedoeld om aan te tonen dat de basisprincipes van programmeren in C# beheerst worden, evenals het toepassen van frameworks en tools zoals Entity Framework Core en Razor Views.
+---
 
-Doel van de Applicatie
-De Virtuele Dierentuin biedt een intuïtieve manier om dieren, verblijven en categorieën te beheren. Gebruikers kunnen:
+## Inleiding
 
-Dieren, verblijven en categorieën toevoegen, bewerken en verwijderen
+De Virtuele Dierentuin is een webapplicatie waarmee gebruikers een digitale dierentuin kunnen beheren.  
+Gebruikers kunnen dieren, verblijven en categorieën aanmaken, bewerken en verwijderen, en daarnaast acties uitvoeren zoals zonsopgang, zonsondergang en etenstijd.
 
-Dieren koppelen aan categorieën en verblijven
+De applicatie is gebouwd met **ASP.NET Core MVC** en **Entity Framework Core**, en laat zien hoe een complete CRUD-webapplicatie wordt opgezet volgens het MVC‑patroon.
 
-Acties uitvoeren zoals zonsopgang, zonsondergang en etenstijd
+---
 
-Controleren of verblijven voldoen aan de eisen van de dieren
+## Doel van de applicatie
 
-Gegevens zoeken en filteren
+Het doel van de applicatie is om:
+- Dieren, verblijven en categorieën overzichtelijk te beheren
+- Gedrag van dieren te simuleren via acties (Sunrise, Sunset, Feeding Time)
+- Te controleren of de dierentuin logisch en veilig is ingericht (CheckConstraints)
+- Een schaalbare en uitbreidbare architectuur te demonstreren
 
-De applicatie is modulair en schaalbaar opgezet, zodat toekomstige uitbreidingen eenvoudig mogelijk zijn.
+---
 
-Functionaliteiten
-Dierenbeheer
-In de applicatie is het mogelijk om dieren toe te voegen, te bewerken en te verwijderen. Elk dier heeft eigenschappen zoals:
+## Functionaliteiten
 
-Naam (bijvoorbeeld "Tijger")
+### Dieren
+- CRUD (Create, Read, Update, Delete)
+- Filteren op naam, soort, grootte, dieet, activiteit, categorie en verblijf
+- Acties:
+  - Sunrise
+  - Sunset
+  - Feeding Time
+  - CheckConstraints
 
-Soort (bijvoorbeeld Panthera tigris)
+---
 
-Grootte
+### Verblijven
+- CRUD op verblijven
+- Eigenschappen: naam, klimaat, habitat type, beveiligingsniveau, grootte
+- Acties per verblijf:
+  - Sunrise
+  - Sunset
+  - Feeding Time
+  - CheckConstraints
 
-Voedingsklasse (bijvoorbeeld Carnivoor)
+---
 
-Activiteitspatroon (Dag / Nacht / Altijd)
+### Categorieën
+- CRUD op categorieën
+- Dieren koppelen aan categorieën
+- Filteren op categorie
 
-Dieren kunnen worden gefilterd op naam, soort of categorie.
+---
 
-Verblijvenbeheer
-Gebruikers kunnen verblijven beheren met eigenschappen zoals:
+### Dierentuin (globaal)
+- Sunrise (alle verblijven)
+- Sunset (alle verblijven)
+- Feeding Time (alle verblijven)
+- CheckConstraints (globale controle)
+- AutoAssign (automatisch dieren indelen)
 
-Naam
+---
 
-Klimaat (bijvoorbeeld Tropisch)
+## Technische specificaties
 
-Habitat type (bijvoorbeeld Bos of Water)
+- **Taal:** C#  
+- **Framework:** ASP.NET Core MVC  
+- **ORM:** Entity Framework Core  
+- **Database:** SQLite  
+- **Frontend:** Razor Views  
+- **Architectuur:** MVC (Model – View – Controller)
 
-Beveiligingsniveau
+---
 
-Grootte
+## Testen
 
-Per verblijf kunnen de volgende acties uitgevoerd worden:
+De applicatie is getest op:
 
-Zonsopgang: toont welke dieren wakker worden of gaan slapen
+- Dierenbeheer (CRUD en filtering)
+- Verblijvenbeheer (CRUD en acties)
+- Categoriebeheer (CRUD en koppeling)
+- Database migraties en seed data
 
-Zonsondergang: toont welke dieren actief worden of gaan slapen
-
-Etenstijd: toont wat elk dier eet
-
-Categorieënbeheer
-Categorieën worden gebruikt om dieren te groeperen, zoals:
-
-Herbivoren
-
-Carnivoren
-
-Gebruikers kunnen categorieën beheren en dieren aan categorieën koppelen. Daarnaast kunnen dieren worden gefilterd op categorie.
-
-Check Constraints
-De applicatie controleert automatisch:
-
-Of een verblijf groot genoeg is voor alle dieren erin
-
-Of conflicterende diëten niet samen in één verblijf zitten (bijvoorbeeld roofdieren met prooidieren)
-
-Dit voorkomt fouten in de indeling van de dierentuin.
-
-Technische Specificaties
-De applicatie is gebouwd met:
-
-C#
-
-ASP.NET Core MVC
-
-Entity Framework Core
-
-SQLite
-
-Razor Views
-
-Architectuur:
-
-Model: gegevensstructuren (Animal, Enclosure, Category)
-
-View: presentatie in de browser
-
-Controller: afhandeling van gebruikersacties
-
-De database wordt opgezet via migraties en gevuld met seed data.
-
-Testen
-De volgende onderdelen zijn getest:
-
-Dierenbeheer: toevoegen, bewerken, verwijderen en filteren
-
-Verblijvenbeheer: beheer en acties functioneren correct
-
-Categorieënbeheer: koppelen en beheren werkt correct
-
-Database: migraties en seed data functioneren zoals verwacht
-
-Conclusie
-De Virtuele Dierentuin is een volledige webapplicatie waarin gebruikers eenvoudig dieren, verblijven en categorieën kunnen beheren. Door de combinatie van ASP.NET Core MVC en Entity Framework is de applicatie overzichtelijk, uitbreidbaar en onderhoudsvriendelijk.
-
-Het project toont aan dat de studenten in staat zijn om een gestructureerde webapplicatie te ontwikkelen volgens professionele standaarden.
+Alle kernfunctionaliteiten functioneren zoals verwacht.
