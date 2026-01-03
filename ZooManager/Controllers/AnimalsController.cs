@@ -64,6 +64,7 @@ public class AnimalsController : Controller
 
         if (a == null) return NotFound();
 
+        // (optioneel) als jullie dit al tonen in de view, kan je dit houden:
         ViewBag.Sunrise = _logic.AnimalSunrise(a);
         ViewBag.Sunset = _logic.AnimalSunset(a);
         ViewBag.Feeding = await _logic.AnimalFeedingTimeAsync(a.Id);
@@ -71,6 +72,69 @@ public class AnimalsController : Controller
 
         return View(a);
     }
+
+    // -------------------------
+    // ACTIONS (requirements 2c-2f)
+    // -------------------------
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Sunrise(int id)
+    {
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
+
+        TempData["ActionTitle"] = "Sunrise";
+        TempData["ActionResult"] = _logic.AnimalSunrise(a);
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Sunset(int id)
+    {
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
+
+        TempData["ActionTitle"] = "Sunset";
+        TempData["ActionResult"] = _logic.AnimalSunset(a);
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FeedingTime(int id)
+    {
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
+
+        TempData["ActionTitle"] = "Feeding time";
+        TempData["ActionResult"] = await _logic.AnimalFeedingTimeAsync(id);
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CheckConstraints(int id)
+    {
+        var a = await _db.Animals.FirstOrDefaultAsync(x => x.Id == id);
+        if (a == null) return NotFound();
+
+        var result = await _logic.AnimalCheckConstraintsAsync(id);
+
+        TempData["ActionTitle"] = "CheckConstraints";
+        TempData["ActionResult"] =
+            $"OK: {result.Ok}\n\nPASSED:\n- {string.Join("\n- ", result.Passed)}\n\nFAILED:\n- {string.Join("\n- ", result.Failed)}";
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // -------------------------
+    // CRUD
+    // -------------------------
 
     public async Task<IActionResult> Create()
     {
@@ -187,24 +251,15 @@ public class AnimalsController : Controller
         var animals = await _db.Animals.OrderBy(a => a.Name).ToListAsync();
 
         // ✅ FIX: None optie + echte categories
-        vm.CategoryOptions = new List<SelectListItem>
-        {
-            new("None", "")
-        };
+        vm.CategoryOptions = new List<SelectListItem> { new("None", "") };
         vm.CategoryOptions.AddRange(categories.Select(c =>
             new SelectListItem(c.Name, c.Id.ToString())));
 
-        vm.EnclosureOptions = new List<SelectListItem>
-        {
-            new("None", "")
-        };
+        vm.EnclosureOptions = new List<SelectListItem> { new("None", "") };
         vm.EnclosureOptions.AddRange(enclosures.Select(e =>
             new SelectListItem(e.Name, e.Id.ToString())));
 
-        vm.PreyOptions = new List<SelectListItem>
-        {
-            new("None", "")
-        };
+        vm.PreyOptions = new List<SelectListItem> { new("None", "") };
         vm.PreyOptions.AddRange(animals.Where(a => a.Id != vm.Id).Select(a =>
             new SelectListItem($"{a.Name} ({a.Species})", a.Id.ToString())));
 

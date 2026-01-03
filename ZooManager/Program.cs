@@ -16,6 +16,13 @@ builder.Services.AddDbContext<ZooDbContext>(options =>
 builder.Services.AddScoped<ZooLogicService>();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ZooDbContext>();
+    db.Database.Migrate();   // maakt DB + past migrations toe
+    DbSeeder.Seed(db);       // vult data als DB leeg is
+}
+
 
 using (var scope = app.Services.CreateScope())
 {

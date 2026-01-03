@@ -1,50 +1,74 @@
-@model ZooManager.Models.Animal
+@model ZooManager.ViewModels.AnimalEditVm
 
-<h1>Animal Details</h1>
+<h1>Create Animal</h1>
 
-<div class="mb-3">
-    <strong>Name:</strong> @Model.Name <br />
-    <strong>Species:</strong> @Model.Species <br />
-    <strong>Category:</strong> @(Model.Category?.Name ?? "None") <br />
-    <strong>Enclosure:</strong> @(Model.Enclosure?.Name ?? "None") <br />
-</div>
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
 
-<hr />
-
-<h3>Actions</h3>
-
-<div class="d-flex gap-2 flex-wrap mb-3">
-    <form asp-action="Sunrise" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.Id" />
-        <button class="btn btn-warning" type="submit">Sunrise</button>
-    </form>
-
-    <form asp-action="Sunset" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.Id" />
-        <button class="btn btn-dark" type="submit">Sunset</button>
-    </form>
-
-    <form asp-action="FeedingTime" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.Id" />
-        <button class="btn btn-success" type="submit">Feeding time</button>
-    </form>
-
-    <form asp-action="CheckConstraints" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.Id" />
-        <button class="btn btn-primary" type="submit">CheckConstraints</button>
-    </form>
-</div>
-
-@if (TempData["ActionResult"] != null)
-{
-    <div class="alert alert-info">
-        <strong>@TempData["ActionTitle"]</strong>
-        <pre style="margin:0; white-space:pre-wrap;">@TempData["ActionResult"]</pre>
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-}
 
-<a class="btn btn-secondary" asp-action="Index">Back</a>
+    <div class="mb-3">
+        <label asp-for="Species" class="form-label"></label>
+        <input asp-for="Species" class="form-control" />
+        <span asp-validation-for="Species" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Size" class="form-label"></label>
+        <select asp-for="Size" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.Size>()"></select>
+        <span asp-validation-for="Size" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DietaryClass" class="form-label"></label>
+        <select asp-for="DietaryClass" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.DietaryClass>()"></select>
+        <span asp-validation-for="DietaryClass" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ActivityPattern" class="form-label"></label>
+        <select asp-for="ActivityPattern" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.ActivityPattern>()"></select>
+        <span asp-validation-for="ActivityPattern" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SpaceRequirement" class="form-label"></label>
+        <input asp-for="SpaceRequirement" class="form-control" />
+        <span asp-validation-for="SpaceRequirement" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SecurityRequirement" class="form-label"></label>
+        <select asp-for="SecurityRequirement" class="form-select" asp-items="Html.GetEnumSelectList<ZooManager.Models.SecurityLevel>()"></select>
+        <span asp-validation-for="SecurityRequirement" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="Model.CategoryOptions"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Enclosure</label>
+        <select asp-for="EnclosureId" class="form-select" asp-items="Model.EnclosureOptions"></select>
+        <span asp-validation-for="EnclosureId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Prey</label>
+        <select asp-for="PreyId" class="form-select" asp-items="Model.PreyOptions"></select>
+        <span asp-validation-for="PreyId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

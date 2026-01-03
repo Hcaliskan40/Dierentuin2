@@ -1,44 +1,50 @@
 @model ZooManager.Models.Animal
-@{
-    ViewData["Title"] = "Animal Details";
-}
 
 <h1>Animal Details</h1>
-<hr/>
 
-<dl class="row">
-    <dt class="col-sm-3">Name</dt>
-    <dd class="col-sm-9">@Model.Name</dd>
-
-    <dt class="col-sm-3">Species</dt>
-    <dd class="col-sm-9">@Model.Species</dd>
-
-    <dt class="col-sm-3">Size</dt>
-    <dd class="col-sm-9">@Model.Size</dd>
-
-    <dt class="col-sm-3">DietaryClass</dt>
-    <dd class="col-sm-9">@Model.DietaryClass</dd>
-
-    <dt class="col-sm-3">ActivityPattern</dt>
-    <dd class="col-sm-9">@Model.ActivityPattern</dd>
-
-    <dt class="col-sm-3">SpaceRequirement</dt>
-    <dd class="col-sm-9">@Model.SpaceRequirement</dd>
-
-    <dt class="col-sm-3">SecurityRequirement</dt>
-    <dd class="col-sm-9">@Model.SecurityRequirement</dd>
-
-    <dt class="col-sm-3">Category</dt>
-    <dd class="col-sm-9">@(Model.Category?.Name ?? "-")</dd>
-
-    <dt class="col-sm-3">Enclosure</dt>
-    <dd class="col-sm-9">@(Model.Enclosure?.Name ?? "-")</dd>
-
-    <dt class="col-sm-3">Prey</dt>
-    <dd class="col-sm-9">@(Model.Prey?.Name ?? "-")</dd>
-</dl>
-
-<div class="d-flex gap-2">
-    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
-    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+<div class="mb-3">
+    <strong>Name:</strong> @Model.Name <br />
+    <strong>Species:</strong> @Model.Species <br />
+    <strong>Category:</strong> @(Model.Category?.Name ?? "None") <br />
+    <strong>Enclosure:</strong> @(Model.Enclosure?.Name ?? "None") <br />
 </div>
+
+<hr />
+
+<h3>Actions</h3>
+
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <form asp-action="Sunrise" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button class="btn btn-warning" type="submit">Sunrise</button>
+    </form>
+
+    <form asp-action="Sunset" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button class="btn btn-dark" type="submit">Sunset</button>
+    </form>
+
+    <form asp-action="FeedingTime" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button class="btn btn-success" type="submit">Feeding time</button>
+    </form>
+
+    <form asp-action="CheckConstraints" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button class="btn btn-primary" type="submit">CheckConstraints</button>
+    </form>
+</div>
+
+@if (TempData["ActionResult"] != null)
+{
+    <div class="alert alert-info">
+        <strong>@TempData["ActionTitle"]</strong>
+        <pre style="margin:0; white-space:pre-wrap;">@TempData["ActionResult"]</pre>
+    </div>
+}
+
+<a class="btn btn-secondary" asp-action="Index">Back</a>

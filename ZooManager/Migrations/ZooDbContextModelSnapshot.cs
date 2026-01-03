@@ -109,8 +109,8 @@ namespace ZooManager.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<int>("SecurityLevel")
                         .HasColumnType("int");
